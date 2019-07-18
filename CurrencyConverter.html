@@ -9,19 +9,39 @@
 	<h1>
 		Currency Converter
 	</h1>
-	<input type="text" id="amount"/>
+	<input type="number" id="amount"/>
 	<button id="btnConvert">Convert Currency</button><br/>
-	<input type="radio" name="typeCurrency" value="USD"/>USD<br/>
+	<input type="radio" name="typeCurrency" checked="checked" value="USD"/>USD<br/>
 	<input type="radio" name="typeCurrency" value="EUR"/>EUR<br/>
 	<span id="result"></span>
 </body>
 <script>
-	function convertToVnd() {
-		let usdAmount = document.getElementById('amount').value;
-	    let conversion = 23262;
-	    let vndAmount = usdAmount*conversion;
-	    document.getElementById('result').innerHTML=`${usdAmount} USD is ${vndAmount} VND`;
+	function getTypeCurrency(){
+		var radios = document.getElementsByName('typeCurrency');
+		for(var i=0;i<radios.length;i++){
+			if(radios[i].checked)
+				return radios[i].value;
+		}
 	}
-	document.getElementById('btnConvert').addEventListener('click',convertToVnd);
+	function convertToVnd(response,currency) {
+		let usdAmount = document.getElementById('amount').value;
+	    let vndAmount = response[currency+"_VND"].val*usdAmount;
+	    document.getElementById('result').innerHTML=`${usdAmount} ${currency} is ${vndAmount} VND`;
+	}
+	function callApi() {
+		currency=getTypeCurrency();
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', 'https://free.currencyconverterapi.com/api/v6/convert?q=' + currency + '_VND&compact=y&apiKey=213deb4d0e7d2bd8309f');
+	  xhr.onload = function() {
+      if (xhr.status === 200) {
+          convertToVnd(JSON.parse(xhr.responseText),currency);
+      }
+      else {
+          alert('Request failed.  Returned status of ' + xhr.status);
+      }
+	  };
+	  xhr.send();
+	}
+	document.getElementById('btnConvert').addEventListener('click',callApi);
 </script>
 </html>
